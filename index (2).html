@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>INFINITE CITY RP</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+*{box-sizing:border-box} body{margin:0;overflow:hidden;font-family:Arial,sans-serif;background:#17202a;color:white}
+#hud{position:fixed;top:10px;left:10px;right:10px;z-index:5;display:flex;justify-content:space-between;pointer-events:none}
+.card{background:#101820dd;padding:9px 12px;border-radius:12px;font-weight:bold;font-size:14px}
+#game{width:100vw;height:100vh;display:block;background:#6bb5e8}
+#msg{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#101820e8;padding:9px 14px;border-radius:10px;z-index:6;display:none}
+#controls{position:fixed;bottom:18px;left:18px;width:170px;height:170px;z-index:10}
+.ctrl{position:absolute;width:52px;height:52px;border-radius:16px;border:0;background:#ffffffcc;font-size:22px}
+#up{left:59px;top:0}#down{left:59px;bottom:0}#left{left:0;top:59px}#right{right:0;top:59px}
+#action{position:fixed;right:22px;bottom:35px;width:76px;height:76px;border-radius:50%;border:0;background:#ffd54a;font-weight:bold;font-size:15px}
+</style>
+</head>
+<body>
+<div id="hud"><div class="card">🏙️ INFINITE CITY RP<br><small>Stesra Starter City</small></div><div class="card">💷 £600<br>⭐ Lv 1</div></div>
+<div id="msg"></div>
+<canvas id="game"></canvas>
+<div id="controls"><button class="ctrl" id="up">▲</button><button class="ctrl" id="left">◀</button><button class="ctrl" id="right">▶</button><button class="ctrl" id="down">▼</button></div>
+<button id="action">ENTER</button>
+<script>
+const c=document.getElementById('game'),x=c.getContext('2d');
+let W,H,keys={}; const p={x:500,y:500,r:16,s:4};
+const buildings=[
+ {x:120,y:120,w:210,h:130,n:'🏨 HOTEL',col:'#d9a441'},
+ {x:720,y:120,w:180,h:140,n:'🏥 HOSPITAL',col:'#f5f5f5'},
+ {x:1100,y:150,w:220,h:130,n:'👮 POLICE',col:'#4d78c8'},
+ {x:180,y:760,w:190,h:130,n:'🎬 CINEMA',col:'#7a4e9e'},
+ {x:760,y:740,w:220,h:150,n:'🛒 MARKET',col:'#42a96f'},
+ {x:1160,y:760,w:230,h:150,n:'💼 JOB CENTRE',col:'#e06d4f'},
+ {x:460,y:1180,w:240,h:150,n:'🚆 TRAIN STATION',col:'#78838e'},
+ {x:1030,y:1150,w:250,h:170,n:'✈️ AIRPORT',col:'#87a4b9'}
+];
+function resize(){W=c.width=innerWidth;H=c.height=innerHeight} addEventListener('resize',resize);resize();
+function near(b){let cx=Math.max(b.x,Math.min(p.x,b.x+b.w)),cy=Math.max(b.y,Math.min(p.y,b.y+b.h));return Math.hypot(p.x-cx,p.y-cy)<55}
+function update(){if(keys.u)p.y-=p.s;if(keys.d)p.y+=p.s;if(keys.l)p.x-=p.s;if(keys.r)p.x+=p.s}
+function draw(){
+ x.clearRect(0,0,W,H); x.save(); x.translate(W/2-p.x,H/2-p.y);
+ x.fillStyle='#63a95f';x.fillRect(-1000,-1000,4000,4000);
+ x.fillStyle='#4c5359'; for(let i=0;i<1600;i+=350){x.fillRect(i,-500,120,2500);x.fillRect(-500,i,2500,120)}
+ x.strokeStyle='#f5d76e';x.lineWidth=4;x.setLineDash([20,18]);
+ for(let i=0;i<1600;i+=350){x.beginPath();x.moveTo(i+60,-500);x.lineTo(i+60,2000);x.stroke();x.beginPath();x.moveTo(-500,i+60);x.lineTo(2000,i+60);x.stroke()} x.setLineDash([]);
+ buildings.forEach(b=>{x.fillStyle=b.col;x.fillRect(b.x,b.y,b.w,b.h);x.fillStyle='#15202b';x.fillRect(b.x+b.w/2-20,b.y+b.h-35,40,35);x.fillStyle='white';x.font='bold 16px Arial';x.fillText(b.n,b.x+10,b.y+25)});
+ x.fillStyle='#ffcc80';x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fill();x.fillStyle='#263238';x.fillRect(p.x-12,p.y+12,24,22);
+ x.restore();
+}
+function loop(){update();draw();requestAnimationFrame(loop)}loop();
+function set(k,v){keys[k]=v}
+[['up','u'],['down','d'],['left','l'],['right','r']].forEach(([id,k])=>{let e=document.getElementById(id);['pointerdown','touchstart'].forEach(t=>e.addEventListener(t,ev=>{ev.preventDefault();set(k,true)}));['pointerup','pointercancel','touchend'].forEach(t=>e.addEventListener(t,ev=>{ev.preventDefault();set(k,false)}))});
+addEventListener('keydown',e=>{if(e.key==='ArrowUp')keys.u=1;if(e.key==='ArrowDown')keys.d=1;if(e.key==='ArrowLeft')keys.l=1;if(e.key==='ArrowRight')keys.r=1});
+addEventListener('keyup',e=>{if(e.key==='ArrowUp')keys.u=0;if(e.key==='ArrowDown')keys.d=0;if(e.key==='ArrowLeft')keys.l=0;if(e.key==='ArrowRight')keys.r=0});
+document.getElementById('action').onclick=()=>{let b=buildings.find(near);let m=document.getElementById('msg');m.textContent=b?`You entered the ${b.n.replace(/^[^ ]+ /,'')}. More gameplay coming next!`:'Walk closer to a building first.';m.style.display='block';setTimeout(()=>m.style.display='none',2200)}
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js'));
+</script></body></html>

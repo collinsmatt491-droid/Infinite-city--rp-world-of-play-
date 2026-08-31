@@ -1,0 +1,8 @@
+{
+  "name": "INFINITE CITY RP",
+  "short_name": "City RP",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#17202a",
+  "theme_color": "#101820"
+}
